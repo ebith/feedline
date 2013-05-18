@@ -79,7 +79,7 @@ fetchTitle = (url, callback) ->
         converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
         body = converter.convert(body)
       $ = cheerio.load body.toString(), { lowerCaseTags: true }
-      callback $('title').text(), url
+      callback $('title').text(), $('meta[name=description]').attr("content"), url
 
 makeSummary = (urls, callback) ->
   tmp = {}
@@ -94,8 +94,9 @@ makeSummary = (urls, callback) ->
   l = (Object.keys tmp).length
   i = 1
   for k, v of tmp
-    fetchTitle k, (title, url) ->
+    fetchTitle k, (title, description, url) ->
       tmp[url].title = title
+      tmp[url].description = description
       if i < l
         i++
       else
@@ -106,12 +107,12 @@ makeFeed = (urls, callback) ->
   makeSummary urls, (data) ->
     for k, v of data
       continue unless v.title
-      description = ''
+      description = if v.description then "<p>#{v.description}</p><p>" else '<p>'
       for name, i in v.name
         description += "#{name}: #{v.comment[i]}<br />"
       feed.item {
         title: v.title
-        description: description
+        description: description + '</p>'
         url: k
       }
     do callback

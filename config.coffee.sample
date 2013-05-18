@@ -1,0 +1,10 @@
+module.exports = {
+  consumerKey: ''
+  consumerSecret: ''
+  accessToken: ''
+  accessTokenSecret: ''
+  skip: ['twitter.com']
+  cron: '0 6 */6 * * *'
+  expand: ['htn.to', 'nico.ms', 'bit.ly']
+  port: 3000
+}

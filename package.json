@@ -1,0 +1,14 @@
+{
+  "name": "feedline",
+  "version": "0.0.1",
+  "author": "ebith <ebith.h@gmail.com>",
+  "dependencies": {
+    "oauth": "*",
+    "byline": "*",
+    "request": "*",
+    "iconv": "*",
+    "cheerio": "*",
+    "rss": "*",
+    "cron": "*"
+  }
+}

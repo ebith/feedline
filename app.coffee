@@ -25,11 +25,12 @@ restart = ->
   setTimeout (-> do streaming), (Math.pow 2, restartCount) * 1000
   restartCount++
 
-pushUrl = (url, name, comment) ->
+pushUrl = (url, name, comment, date) ->
   urls.push {
     url: url
     name: name
     comment: comment
+    date: date
   }
 
 expandUrl = (url, callback) ->
@@ -55,9 +56,9 @@ streaming = ->
             if (config.skip.indexOf parsedUrl.hostname) isnt -1 then continue
             if (config.expand.indexOf parsedUrl.hostname) isnt -1
               expandUrl url.expanded_url, (url) ->
-                pushUrl url, tweet.user.screen_name, tweet.text
+                pushUrl url, tweet.user.screen_name, tweet.text, tweet.created_at
             else
-                pushUrl url.expanded_url, tweet.user.screen_name, tweet.text
+                pushUrl url.expanded_url, tweet.user.screen_name, tweet.text, tweet.created_at
 
     ls.on 'end', ->
       do restart
@@ -88,10 +89,12 @@ makeSummary = (urls, callback) ->
     tmp[v.url] = {
       name: []
       comment: []
+      date: []
     }
   for v, i in urls
     tmp[v.url].name.push v.name
     tmp[v.url].comment.push v.comment
+    tmp[v.url].date.push v.date
   l = (Object.keys tmp).length
   i = 1
   for k, v of tmp
@@ -115,6 +118,7 @@ makeFeed = (urls, callback) ->
         title: v.title
         description: description + '</p>'
         url: k
+        date: v.date[0]
       }
     do callback
 

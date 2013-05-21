@@ -35,7 +35,7 @@ pushUrl = (url, name, comment, date) ->
 
 expandUrl = (url, callback) ->
   request.head {url: url, followAllRedirects: true}, (err, res, body) ->
-    if 200 <= res.statusCode < 300
+    if not err and 200 <= res.statusCode < 300
       callback res.request.href
     else
       callback url
@@ -74,14 +74,17 @@ feed = new RSS {
 
 fetchTitle = (url, callback) ->
   request.get url: url, encoding: null, (error, response, body) ->
-    if 200 <= response.statusCode < 300
+    if not error and 200 <= response.statusCode < 300
       charset = response.headers['content-type']?.match(/charset=([\w\-]+)/)?[1]
       charset = body.toString('binary').match(/charset="?([\w\-]+)"?/)?[1] unless charset?
       if charset?
-        converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
-        body = converter.convert(body)
+        try
+          converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
+          body = converter.convert(body)
       $ = cheerio.load body.toString(), { lowerCaseTags: true }
       callback $('title').text(), $('meta[name=description]').attr("content"), url
+    else
+      callback null, null, url
 
 makeSummary = (urls, callback) ->
   tmp = {}

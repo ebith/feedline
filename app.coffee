@@ -117,12 +117,12 @@ makeFeed = (urls, callback) ->
   makeSummary urls, (data) ->
     for k, v of data
       continue unless v.title
-      description = if v.description then "<p>#{v.description}</p><p>" else '<p>'
+      description = if v.description then "<p>#{v.description}</p><ul>" else '<ul>'
       for name, i in v.name
-        description += "#{name}: #{v.comment[i]}<br />"
+        description += "<li><a href=\"https://twitter.com/#{name}\">@#{name}</a>: #{v.comment[i]}</li>"
       feed.item {
         title: v.title
-        description: description + '</p>'
+        description: description + '</ul>'
         url: k
         date: v.date[0]
       }

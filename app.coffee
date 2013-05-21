@@ -41,6 +41,8 @@ expandUrl = (url, callback) ->
       callback url
 
 streaming = ->
+  # JP = new RegExp "[\\u4e00-\\u9fa0\\u30A1-\\u30F6\\u30FC\\u3042-\\u3093\\u3001\\u3002\\uFF01\\uFF1F]"
+  # req = oauth.get 'https://userstream.twitter.com/1.1/statuses/sample.json', config.accessToken, config.accessTokenSecret
   req = oauth.get 'https://userstream.twitter.com/1.1/user.json?replies=all', config.accessToken, config.accessTokenSecret
   req.on 'response', (res) ->
     res.setEncoding 'utf8'
@@ -52,6 +54,7 @@ streaming = ->
         if tweet.entities?.urls.length > 0
           for url in tweet.entities.urls
             parsedUrl = liburl.parse url.expanded_url
+            # if not JP.test tweet.text then continue
             if tweet.user.screen_name is config.myName then continue
             if (config.skip.indexOf parsedUrl.hostname) isnt -1 then continue
             if (config.expand.indexOf parsedUrl.hostname) isnt -1

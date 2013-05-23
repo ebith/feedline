@@ -3,7 +3,7 @@ module.exports = {
   consumerSecret: ''
   accessToken: ''
   accessTokenSecret: ''
-  skip: ['twitter.com', 'instagram.com', 'twitpic.com', 'yfrog.com', 'gyazo.com', 'shindanmaker.com', '4sq.com']
+  skip: ['twitter.com', 'instagram.com', 'twitpic.com', 'yfrog.com', 'gyazo.com', 'shindanmaker.com', '4sq.com', 'sinkan.net', 'twipple.jp']
   cron: '0 6 */6 * * *'
   expand: ['htn.to', 'nico.ms', 'bit.ly']
   port: 3000

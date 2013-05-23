@@ -10,7 +10,7 @@ RSS = require 'rss'
 http = require 'http'
 
 restartCount = 0
-urls = []
+urls = {}
 xml = ''
 
 oauth = new OAuth 'http://twitter.com/oauth/request_token',
@@ -25,13 +25,33 @@ restart = ->
   setTimeout (-> do streaming), (Math.pow 2, restartCount) * 1000
   restartCount++
 
+fetchTitle = (url, callback) ->
+  req = request.get url: url, encoding: null, (error, response, body) ->
+    if not error and 200 <= response.statusCode < 300
+      charset = response.headers['content-type']?.match(/charset=([\w\-]+)/)?[1]
+      charset = body.toString('binary').match(/charset="?([\w\-]+)"?/)?[1] unless charset?
+      if charset?
+        try
+          converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
+          body = converter.convert(body)
+      $ = cheerio.load body.toString(), { lowerCaseTags: true }
+      callback $('title').text(), $('meta[name=description]').attr("content"), url
+    else
+      callback null, null, url
+
 pushUrl = (url, name, comment, date) ->
-  urls.push {
-    url: url
-    name: name
-    comment: comment
-    date: date
-  }
+  unless urls[url]
+    urls[url] = {
+      name: []
+      comment: []
+      date: []
+    }
+    fetchTitle url, (title, description, url) ->
+      urls[url].title = title
+      urls[url].description = description
+  urls[url].name.push name
+  urls[url].comment.push comment
+  urls[url].date.push date
 
 expandUrl = (url, callback) ->
   request.head {url: url, followAllRedirects: true}, (err, res, body) ->
@@ -74,64 +94,22 @@ feed = new RSS {
   title: 'feedline'
   }
 
-fetchTitle = (url, callback) ->
-  request.get url: url, encoding: null, (error, response, body) ->
-    if not error and 200 <= response.statusCode < 300
-      charset = response.headers['content-type']?.match(/charset=([\w\-]+)/)?[1]
-      charset = body.toString('binary').match(/charset="?([\w\-]+)"?/)?[1] unless charset?
-      if charset?
-        try
-          converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
-          body = converter.convert(body)
-      $ = cheerio.load body.toString(), { lowerCaseTags: true }
-      callback $('title').text(), $('meta[name=description]').attr("content"), url
-    else
-      callback null, null, url
-
-makeSummary = (urls, callback) ->
-  tmp = {}
-  for v in urls
-    tmp[v.url] = {
-      name: []
-      comment: []
-      date: []
-    }
-  for v, i in urls
-    tmp[v.url].name.push v.name
-    tmp[v.url].comment.push v.comment
-    tmp[v.url].date.push v.date
-  l = (Object.keys tmp).length
-  i = 1
-  for k, v of tmp
-    fetchTitle k, (title, description, url) ->
-      tmp[url].title = title
-      tmp[url].description = description
-      if i < l
-        i++
-      else
-        urls.splice(0, l)
-        callback tmp
-
-makeFeed = (urls, callback) ->
-  makeSummary urls, (data) ->
-    for k, v of data
-      continue unless v.title
-      description = if v.description then "<p>#{v.description}</p><ul>" else '<ul>'
-      for name, i in v.name
-        description += "<li><a href=\"https://twitter.com/#{name}\">@#{name}</a>: #{v.comment[i]}</li>"
-      feed.item {
-        title: v.title
-        description: description + '</ul>'
-        url: k
-        date: v.date[0]
-      }
-    do callback
-
 job = new cronJob config.cron, ->
-  makeFeed urls, ->
-    feed.items = feed.items.reverse()
-    xml = feed.xml()
-    feed.items = feed.items.reverse()
+  for k, v of urls
+    continue unless v.title
+    description = if v.description then "<p>#{v.description}</p><ul>" else '<ul>'
+    for name, i in v.name
+      description += "<li><a href=\"https://twitter.com/#{name}\">@#{name}</a>: #{v.comment[i]}</li>"
+    feed.item {
+      title: v.title
+      description: description + '</ul>'
+      url: k
+      date: v.date[0]
+    }
+    delete urls[k]
+  feed.items = feed.items.reverse()
+  xml = feed.xml()
+  feed.items = feed.items.reverse()
 do job.start
 
 http.createServer (req, res) ->

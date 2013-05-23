@@ -8,4 +8,5 @@ module.exports = {
   expand: ['htn.to', 'nico.ms', 'bit.ly']
   port: 3000
   myName: 'ebith'
+  test: false
 }

@@ -7,7 +7,6 @@
     "byline": "*",
     "request": "*",
     "iconv": "*",
-    "cheerio": "*",
     "rss": "*",
     "cron": "*"
   }

@@ -3,7 +3,6 @@ OAuth = (require 'oauth').OAuth
 byline = require 'byline'
 request = require 'request'
 iconv = require 'iconv'
-cheerio = require 'cheerio'
 liburl = require 'url'
 cronJob = (require 'cron').CronJob
 RSS = require 'rss'
@@ -34,8 +33,10 @@ fetchTitle = (url, callback) ->
         try
           converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
           body = converter.convert(body)
-      $ = cheerio.load body.toString(), { lowerCaseTags: true }
-      callback $('title').text(), $('meta[name=description]').attr("content"), url
+      body = body.toString()
+      title = body.match(/<title>(.*?)<\/title>/i)?[1]
+      description = body.match(/meta name="description" content="(.*?)"/im)?[1]
+      callback title, (if description?.length > 500 then description.slice(0, 500) + '...' else description), url
     else
       callback null, null, url
 

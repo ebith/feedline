@@ -74,7 +74,7 @@ streaming = ->
         if tweet.entities?.urls.length > 0
           for url in tweet.entities.urls
             parsedUrl = liburl.parse url.expanded_url
-            if tweet.user.screen_name is config.myName or (config.skip.indexOf parsedUrl.hostname) isnt -1 then continue
+            if config.ignoreName.test tweet.user.screen_name or (config.skip.indexOf parsedUrl.hostname) isnt -1 then continue
             if (config.expand.indexOf parsedUrl.hostname) isnt -1
               expandUrl url.expanded_url, (url) ->
                 pushUrl url, tweet.user.screen_name, tweet.text, tweet.created_at

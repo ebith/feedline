@@ -26,11 +26,14 @@ restart = ->
 
 fetchTitle = (url, callback) ->
   req = request.get url: url, encoding: null, (error, response, body) ->
-    if not error and 200 <= response.statusCode < 300
+    if not error and 200 <= response.statusCode < 300 and response.headers['content-type']?.match(/text\/html/)
       charset = response.headers['content-type']?.match(/charset=([\w\-]+)/)?[1]
-      charset = body.toString('binary').match(/charset="?([\w\-]+)"?/)?[1] unless charset?
-      if charset?
-        try
+      charset = body.toString('binary').match(/charset="?([\w\-]+)"?/i)?[1] unless charset
+      if charset
+        switch charset.toLowerCase()
+          when 'x-sjis'
+            charset = 'Shift_JIS'
+        try # 未知のcharsetで転ける
           converter = new iconv.Iconv(charset, 'UTF-8//IGNORE')
           body = converter.convert(body)
       body = body.toString()

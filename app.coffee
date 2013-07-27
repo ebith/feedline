@@ -1,4 +1,3 @@
-config = require './config'
 OAuth = (require 'oauth').OAuth
 byline = require 'byline'
 request = require 'request'
@@ -8,6 +7,16 @@ cronJob = (require 'cron').CronJob
 RSS = require 'rss'
 http = require 'http'
 ent = require 'ent'
+fs = require 'fs'
+
+config = require './config'
+configMtime = 0
+loadConfig = (lastTime=0) ->
+  configPath = './config'
+  configMtime = (fs.statSync require.resolve configPath).mtime.getTime()
+  if lastTime < configMtime
+    delete require.cache[require.resolve configPath]
+    config = require configPath
 
 restartCount = 0
 urls = {}
@@ -98,6 +107,7 @@ feed = new RSS {
   }
 
 job = new cronJob config.cron, ->
+  loadConfig configMtime
   for k, v of urls
     continue unless v.title
     description = if v.description then "<p>#{v.description}</p><ul>" else '<ul>'

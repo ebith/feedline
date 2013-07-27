@@ -7,6 +7,7 @@ liburl = require 'url'
 cronJob = (require 'cron').CronJob
 RSS = require 'rss'
 http = require 'http'
+ent = require 'ent'
 
 restartCount = 0
 urls = {}
@@ -103,8 +104,8 @@ job = new cronJob config.cron, ->
     for name, i in v.name
       description += "<li><a href=\"https://twitter.com/#{name}\">@#{name}</a>: #{v.comment[i]}</li>"
     feed.item {
-      title: v.title
-      description: description + '</ul>'
+      title: ent.decode v.title
+      description: ent.decode description + '</ul>'
       url: k
       date: v.date[0]
     }

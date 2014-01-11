@@ -82,7 +82,7 @@ streaming = ->
     ls = res.pipe es.split '\n'
 
     ls.on 'data', (line) ->
-      if line isnt ''
+      if line.length > 1
         tweet = JSON.parse line
         if tweet.entities?.urls.length > 0
           for url in tweet.entities.urls

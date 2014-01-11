@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "author": "ebith <ebith.h@gmail.com>",
   "dependencies": {
-    "oauth": "*",
-    "byline": "*",
-    "request": "*",
-    "iconv": "*",
-    "rss": "*",
-    "cron": "*",
-    "ent": "*"
+    "cron": "~1.0.1",
+    "ent": "~0.1.0",
+    "oauth": "~0.9.11",
+    "rss": "~0.2.1",
+    "request": "~2.31.0",
+    "iconv": "~2.0.7",
+    "event-stream": "~3.1.0"
   }
 }

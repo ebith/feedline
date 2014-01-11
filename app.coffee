@@ -82,17 +82,17 @@ streaming = ->
     ls = res.pipe es.split '\n'
 
     ls.on 'data', (line) ->
-      if line.length > 1
-        tweet = JSON.parse line
-        if tweet.entities?.urls.length > 0
-          for url in tweet.entities.urls
-            parsedUrl = liburl.parse url.expanded_url
-            if config.ignoreName.test tweet.user.screen_name or (config.skip.indexOf parsedUrl.hostname) isnt -1 then continue
-            if (config.expand.indexOf parsedUrl.hostname) isnt -1
-              expandUrl url.expanded_url, (url) ->
-                pushUrl url, tweet.user.screen_name, tweet.text, tweet.created_at
-            else
-                pushUrl url.expanded_url, tweet.user.screen_name, tweet.text, tweet.created_at
+      return unless line.length > 1
+      tweet = JSON.parse line
+      if tweet.entities?.urls.length > 0
+        for url in tweet.entities.urls
+          parsedUrl = liburl.parse url.expanded_url
+          if config.ignoreName.test tweet.user.screen_name or (config.skip.indexOf parsedUrl.hostname) isnt -1 then continue
+          if (config.expand.indexOf parsedUrl.hostname) isnt -1
+            expandUrl url.expanded_url, (url) ->
+              pushUrl url, tweet.user.screen_name, tweet.text, tweet.created_at
+          else
+            pushUrl url.expanded_url, tweet.user.screen_name, tweet.text, tweet.created_at
 
     ls.on 'end', ->
       do restart

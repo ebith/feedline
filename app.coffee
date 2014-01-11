@@ -1,5 +1,5 @@
 OAuth = (require 'oauth').OAuth
-byline = require 'byline'
+es = require 'event-stream'
 request = require 'request'
 iconv = require 'iconv'
 liburl = require 'url'
@@ -79,7 +79,7 @@ streaming = ->
   req = oauth.get streamUrl, config.accessToken, config.accessTokenSecret
   req.on 'response', (res) ->
     res.setEncoding 'utf8'
-    ls = byline.createLineStream res
+    ls = res.pipe es.split '\n'
 
     ls.on 'data', (line) ->
       if line isnt ''

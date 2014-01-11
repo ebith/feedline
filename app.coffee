@@ -31,7 +31,7 @@ oauth = new OAuth 'http://twitter.com/oauth/request_token',
   'HMAC-SHA1'
 
 restart = ->
-  setTimeout (-> do streaming), (Math.pow 2, restartCount) * 1000
+  setTimeout (-> do streaming), (Math.pow restartCount, 2) * 1000
   restartCount++
 
 fetchTitle = (url, callback) ->

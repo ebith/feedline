@@ -75,7 +75,7 @@ expandUrl = (url, callback) ->
       callback url
 
 streaming = ->
-  streamUrl = unless config.test then 'https://userstream.twitter.com/1.1/user.json?replies=all' else 'https://userstream.twitter.com/1.1/statuses/sample.json'
+  streamUrl = unless config.test then 'https://userstream.twitter.com/1.1/user.json?replies=all' else 'https://stream.twitter.com/1.1/statuses/sample.json'
   req = oauth.get streamUrl, config.accessToken, config.accessTokenSecret
   req.on 'response', (res) ->
     res.setEncoding 'utf8'

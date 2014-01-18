@@ -113,16 +113,16 @@ job = new cronJob config.cron, ->
     description = if v.description then "<p>#{v.description}</p><ul>" else '<ul>'
     for name, i in v.name
       description += "<li><a href=\"https://twitter.com/#{name}\">@#{name}</a>: #{v.comment[i]}</li>"
-    feed.item {
+    feed.items.unshift {
       title: ent.decode v.title
       description: ent.decode description + '</ul>'
       url: k
       date: v.date[0]
+      categories: []
+      enclosure: false
     }
     delete urls[k]
-  feed.items = feed.items.reverse()
   xml = feed.xml()
-  feed.items = feed.items.reverse()
 do job.start
 
 http.createServer (req, res) ->

@@ -122,6 +122,7 @@ job = new cronJob config.cron, ->
       enclosure: false
     }
     delete urls[k]
+  feed.items = feed.items.slice 0, 1000
   xml = feed.xml()
 do job.start
 

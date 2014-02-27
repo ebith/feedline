@@ -8,6 +8,7 @@ RSS = require 'rss'
 http = require 'http'
 ent = require 'ent'
 fs = require 'fs'
+log = new (require 'log') 'info'
 
 config = require './config'
 configMtime = 0
@@ -96,7 +97,7 @@ streaming = ->
 
     ls.on 'end', ->
       do restart
-      console.log "restartCount: #{restartCount}"
+      log.info "restartCount: #{restartCount}"
 
   do req.end
 

@@ -38,18 +38,29 @@ restart = ->
 
 fetchTitle = (url, callback) ->
   buffer = new Buffer 0
-  req = request.get url
+  req = request.get url, timeout: 10 * 1000, headers: {'User-Agent': 'feedline'}
+  req.on 'error', (err) ->
+    log.info err.stack
   req.on 'response', (res) ->
     if res.statusCode is 200 and res.headers['content-type']?.match /text\/html/
+      charset = res.headers['content-type'].match(/charset=([\w\-]+)/)?[1]
       res.on 'data', (chunk) ->
         buffer = Buffer.concat [buffer, chunk]
       res.on 'end', ->
-        charset = charsetDetector.detectCharset(buffer).toString()
-        converter = new iconv.Iconv charset, 'UTF-8//IGNORE'
-        body = converter.convert(buffer).toString()
+        if not (charset in ['utf-8', 'shift_jis', 'euc-jp'])
+          charset = charsetDetector.detectCharset(buffer)
+          if charset.confidence < 60
+            charset = 'UTF-8'
+          else
+            charset = charset.toString()
+        if charset.toUpperCase() is 'UTF-8'
+          body = buffer.toString()
+        else
+          converter = new iconv.Iconv charset, 'UTF-8//IGNORE'
+          body = converter.convert(buffer).toString()
         title = body.match(/<title>(.*?)<\/title>/i)?[1]
         description = body.match(/meta name="description" content="(.*?)"/im)?[1]
-        callback title, (if description?.length > 500 then description.slice(0, 500) + '...' else description), url
+        callback title, (if description?.length > 500 then description.slice(0, 500) + '\u2026' else description), url
     else
       do req.abort
       callback null, null, url

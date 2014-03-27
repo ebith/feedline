@@ -103,6 +103,7 @@ streaming = ->
           if (config.ignoreName.test tweet.user.screen_name) or (parsedUrl.hostname in config.skip) then continue
           if parsedUrl.hostname in config.expand
             expandUrl url.expanded_url, (url) ->
+              if liburl.parse(url).hostname in config.skip then return
               pushUrl url, tweet.user.screen_name, tweet.text, tweet.created_at
           else
             pushUrl url.expanded_url, tweet.user.screen_name, tweet.text, tweet.created_at
